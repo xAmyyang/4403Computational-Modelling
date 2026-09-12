@@ -9,7 +9,7 @@ Our main research question is: **How does vehicle density affect traffic flow an
 
 We will start with cars randomly distributed on the road at different densities, for example 10%, 30%, 50%, 70%, and 90%.
 
-For each density, we will run the simulation over multiple time steps and measure things such as the average speed of vehicles and traffic flow.**We want to see whether there is a critical density where congestion starts to emerge.
+For each density, we will run the simulation over multiple time steps and measure things such as the average speed of vehicles and traffic flow. We want to see whether there is a critical density where congestion starts to emerge.
 
 If the basic model works well, we may extend it by adding random braking behaviour.
 
@@ -36,7 +36,11 @@ Vehicle density
 - traffic flow
  
 ## Planned Experiments
-Run simulations across a range of vehicle densities and compare system behaviour.
+Run simulations across a range of vehicle densities and compare system behaviour. For each vehicle density, we will randomly distribute vehicles on the road and run the simulation for multiple time steps. We will repeat the simulation several times using different random initial conditions and calculate the average results.
+
+## Expected Outcomes
+We expect average vehicle speed to decrease as vehicle density increases. Traffic flow may initially increase as more vehicles are added, but may decrease once congestion becomes severe. We aim to identify whether there is a transition point where congestion begins to emerge.
  
 ## Possible Extension
 Introduce random braking and investigate whether it changes the onset of congestion.
+In the extended model, a vehicle may randomly stop even when the cell in front is empty. We may compare different braking probabilities, such as 0, 0.1, 0.2, and 0.3.
