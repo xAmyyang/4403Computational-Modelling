@@ -1,8 +1,8 @@
-# Airport Security Queue Simulation
+# Airport Security Queue Model
 
 ## Project Overview
 
-This project investigates passenger congestion and waiting behaviour in an airport security screening system using a computational simulation.
+This project investigates passenger congestion and waiting behaviour in an airport security screening system.
 
 Passengers arrive at the security area, join a queue, wait for an available checkpoint, undergo security screening, and then leave the system.
 
