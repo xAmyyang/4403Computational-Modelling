@@ -50,9 +50,11 @@ At each time step:
 3. If a security checkpoint is available, the next passenger in the queue begins screening.
 4. Each checkpoint can process one passenger at a time.
 5. Screening requires a defined amount of service time.
-6. Some passengers may require additional screening, creating a random delay.
-7. After screening is completed, the passenger leaves the system.
-8. Queue length, waiting time, and throughput are recorded.
+6. If the current queue if full, the passenger checks the other queues first.
+7. If all queues are full, the passenger enter an external waiting area.
+8. Some passengers may require additional screening, creating a random delay.
+9. After screening is completed, the passenger leaves the system.
+10. Queue length, waiting time, and throughput are recorded.
 
 ---
 
@@ -62,6 +64,7 @@ The main parameters we plan to investigate are:
 
 - **Passenger arrival rate**
 - **Number of security checkpoints**
+- **Queue capacity**
 
 Additional parameters may include:
 
@@ -113,6 +116,12 @@ or numerical values such as:
 - 2 checkpoints
 - 3 checkpoints
 - 4 checkpoints
+
+### Queue capacity
+- 5 passengers
+- 10 passengers
+- 15 passengers
+- 20 passengers
 
 For each combination of parameters, the simulation will be repeated multiple times because passenger arrivals and delays may be stochastic.
 
