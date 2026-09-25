@@ -42,18 +42,16 @@ Security checkpoints act as service resources that process passengers.
 
 At every simulation time step:
 
-1. New passengers may arrive.
-2. Passengers join the queue if queue capacity is available.
-3. If a security checkpoint is free, the next passenger enters screening.
-4. Each passenger requires a certain amount of processing time.
-5. After screening is completed, the passenger leaves the system.
-6. Queue length, waiting time, throughput, and rejected passengers are recorded.
-
----
-
-## Main Parameters
-
-### 1. Passenger Arrival Rate
+1. New passengers may arrive according to a defined arrival probability or arrival rate.
+2. Newly arrived passengers join the security queue.
+3. If a security checkpoint is available, the next passenger in the queue begins screening.
+4. Each checkpoint can process one passenger at a time.
+5. Screening requires a defined amount of service time.
+6. If the current queue if full, the passenger checks the other queues first.
+7. If all queues are full, the passenger enter an external waiting area.
+8. Some passengers may require additional screening, creating a random delay.
+9. After screening is completed, the passenger leaves the system.
+10. Queue length, waiting time, and throughput are recorded.
 
 The passenger arrival rate represents how frequently new passengers enter the security system.
 
