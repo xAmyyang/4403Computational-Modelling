@@ -4,172 +4,250 @@
 
 This project investigates passenger congestion and waiting behaviour in an airport security screening system.
 
-Instead of modelling traffic flow, we model passengers as individual agents who arrive at an airport security area, join a queue, wait for an available checkpoint, undergo security screening, and then leave the system.
+Passengers arrive at the security area, join a queue, wait for an available checkpoint, undergo security screening, and then leave the system.
 
-The aim of the project is to investigate how passenger demand and security service capacity affect queue formation and waiting time.
+The aim of this project is to investigate how different system parameters affect queue length, passenger waiting time, throughput, and overall system stability.
 
 ---
 
 ## Research Question
 
-**How do passenger arrival rate and the number of security checkpoints affect queue length and passenger waiting time in an airport security screening system?**
+**How do passenger demand, queue capacity, processing time, and the number of security checkpoints affect passenger waiting time and congestion in an airport security screening system?**
 
-Possible extension:
+More specifically, we investigate four main parameters:
 
-**How do random additional screening delays affect the stability and efficiency of the queue?**
+1. Passenger arrival rate
+2. Queue capacity
+3. Passenger processing time variation
+4. Number of security checkpoints
 
 ---
 
 ## Modelling Approach
 
-We plan to use an **agent-based / discrete-time simulation**.
+The system will be implemented as a discrete-time agent-based simulation.
 
 Each passenger is represented as an individual agent.
 
-Each passenger may have attributes such as:
+A passenger may have attributes such as:
 
 - arrival time
 - queue entry time
 - service start time
-- service duration
+- processing time
 - waiting time
-- whether additional screening is required
+- completion time
 
 Security checkpoints act as service resources that process passengers.
 
-The simulation will evolve over discrete time steps.
+At every simulation time step:
 
----
-
-## Model Rules
-
-At each time step:
-
-1. New passengers may arrive according to a defined arrival probability or arrival rate.
-2. Newly arrived passengers join the security queue.
-3. If a security checkpoint is available, the next passenger in the queue begins screening.
-4. Each checkpoint can process one passenger at a time.
-5. Screening requires a defined amount of service time.
-6. Some passengers may require additional screening, creating a random delay.
-7. After screening is completed, the passenger leaves the system.
-8. Queue length, waiting time, and throughput are recorded.
+1. New passengers may arrive.
+2. Passengers join the queue if queue capacity is available.
+3. If a security checkpoint is free, the next passenger enters screening.
+4. Each passenger requires a certain amount of processing time.
+5. After screening is completed, the passenger leaves the system.
+6. Queue length, waiting time, throughput, and rejected passengers are recorded.
 
 ---
 
 ## Main Parameters
 
-The main parameters we plan to investigate are:
+### 1. Passenger Arrival Rate
 
-- **Passenger arrival rate**
-- **Number of security checkpoints**
+The passenger arrival rate represents how frequently new passengers enter the security system.
 
-Additional parameters may include:
+Different arrival rates will be tested to investigate how increasing passenger demand affects:
 
-- service time
-- probability of additional screening
-- additional screening duration
+- queue length
+- waiting time
+- throughput
+- system congestion
 
-To keep the project manageable, the initial experiments will focus mainly on passenger arrival rate and number of checkpoints.
+Example values may include:
 
----
+- low arrival rate
+- medium arrival rate
+- high arrival rate
 
-## Output Measures
-
-We plan to measure:
-
-- average passenger waiting time
-- maximum passenger waiting time
-- average queue length
-- maximum queue length
-- passenger throughput
-- number of passengers processed
-
-These measurements will allow us to compare system performance under different conditions.
-
----
-
-## Experimental Plan
-
-We will systematically vary the passenger arrival rate and number of available checkpoints.
-
-For example:
-
-### Passenger arrival rate
-
-- Low
-- Medium
-- High
-
-or numerical values such as:
+or numerical probabilities such as:
 
 - 0.2 passengers per time step
 - 0.4 passengers per time step
 - 0.6 passengers per time step
 - 0.8 passengers per time step
 
-### Number of checkpoints
+---
+
+### 2. Queue Capacity
+
+Queue capacity represents the maximum number of passengers that can wait in the security queue.
+
+Different queue capacities will be tested to investigate how limited waiting space affects the system.
+
+If the queue reaches maximum capacity, newly arriving passengers may be unable to enter the queue.
+
+Possible measurements include:
+
+- number of passengers rejected
+- maximum queue length
+- average waiting time
+- system throughput
+
+---
+
+### 3. Passenger Processing Time Variation
+
+Passenger processing time represents how long each passenger requires at a security checkpoint.
+
+Instead of assuming that every passenger takes exactly the same amount of time, processing time may vary between passengers.
+
+For example:
+
+- Fixed processing time:
+  - every passenger requires 3 time steps
+
+- Low variation:
+  - processing time randomly varies between 2–4 time steps
+
+- High variation:
+  - processing time randomly varies between 1–6 time steps
+
+This experiment will investigate whether greater variation in passenger processing time increases queue length and waiting time.
+
+---
+
+### 4. Number of Security Checkpoints
+
+The number of active security checkpoints determines the processing capacity of the airport security system.
+
+Experiments may compare:
 
 - 1 checkpoint
 - 2 checkpoints
 - 3 checkpoints
 - 4 checkpoints
 
-For each combination of parameters, the simulation will be repeated multiple times because passenger arrivals and delays may be stochastic.
+The aim is to investigate how increasing the number of checkpoints affects:
 
-We will compare the average results across repeated simulations.
+- passenger waiting time
+- queue length
+- throughput
 
----
-
-## Expected Investigation
-
-We expect that increasing passenger arrival rate will increase queue length and waiting time.
-
-Increasing the number of checkpoints should increase service capacity and reduce congestion.
-
-However, we are particularly interested in whether there is a point where passenger arrival demand becomes greater than the processing capacity of the system, causing the queue to continuously grow.
-
-This may reveal a transition between:
-
-- a stable queueing system, where passengers are processed fast enough, and
-- an overloaded system, where the queue continues to increase.
+This parameter may also be investigated together with processing time variation.
 
 ---
 
-## Originality and Contribution
+## Experimental Design
 
-Airport security queueing is not being modelled as a traffic-flow cellular automaton.
+The project will investigate the four main parameters through controlled experiments.
 
-Our model focuses on:
+Where possible, one parameter will be varied while the other parameters are held constant.
 
-- stochastic passenger arrivals,
-- individual passenger waiting times,
-- service capacity,
-- multiple security checkpoints,
-- random additional screening delays.
+### Experiment A — Passenger Arrival Rate
 
-Our contribution is to investigate how these factors interact and how changes in passenger demand and checkpoint capacity affect the stability and efficiency of the airport security queue.
+Vary passenger arrival rate while keeping:
 
-We may further extend the model by comparing different queue-management strategies, such as:
+- queue capacity constant
+- number of checkpoints constant
+- processing time constant
 
-- one shared queue for all checkpoints, and
-- separate queues for individual checkpoints.
+Measure:
+
+- average waiting time
+- average queue length
+- maximum queue length
+- throughput
+
+---
+
+### Experiment B — Queue Capacity
+
+Vary maximum queue capacity while keeping other parameters constant.
+
+Measure:
+
+- number of passengers rejected
+- average waiting time
+- throughput
+- queue utilisation
+
+---
+
+### Experiment C — Passenger Processing Time Variation
+
+Compare different levels of passenger processing time variation while keeping:
+
+- arrival rate constant
+- queue capacity constant
+- number of checkpoints constant
+
+Measure:
+
+- average waiting time
+- maximum waiting time
+- average queue length
+- throughput
+
+---
+
+### Experiment D — Number of Security Checkpoints
+
+Vary the number of checkpoints while keeping other parameters constant.
+
+Measure:
+
+- average waiting time
+- average queue length
+- throughput
+
+---
+
+## Combined Parameter Analysis
+
+After analysing individual parameters, selected parameter combinations may also be investigated.
+
+For example:
+
+### Processing Time Variation × Number of Checkpoints
+
+This experiment will investigate whether increasing the number of checkpoints can compensate for unpredictable passenger processing times.
+
+### Arrival Rate × Queue Capacity
+
+This experiment will investigate how queue capacity affects system performance under different passenger demand levels.
+
+---
+
+## Output Measures
+
+The main quantitative measurements will include:
+
+- Average passenger waiting time
+- Maximum passenger waiting time
+- Average queue length
+- Maximum queue length
+- Passenger throughput
+- Number of passengers successfully processed
+- Number of passengers unable to join the queue
+
+Simulation results will be visualised using graphs and summary statistics.
 
 ---
 
 ## Project Structure
 
 ```text
-airport-security-queue/
-│
-├── README.md
-├── src/
-│   └── model.py
-│
-├── experiments/
-│   └── experiments.ipynb
-│
-├── results/
-│   ├── figures/
-│   └── data/
-│
-└── report/
+project-root/
+|
++-- src/                  # Main simulation code, models, classes, functions
+|
++-- utils/                # Helper and utility functions
+|
++-- data/                 # Generated datasets or sample simulation results
+|
++-- notebooks/            # Jupyter Notebooks for experiments, analysis and demonstrations
+|
++-- requirements.txt      # Python dependencies
+|
++-- README.md             # Project overview, setup instructions and usage guide
