@@ -9,3 +9,4 @@ class Passenger:
         self.completion_time = None
 
         self.waiting_time = None
+        self.processing_time = None

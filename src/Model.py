@@ -14,13 +14,32 @@ class AirportSecurityModel:
         processing_time=3,
         simulation_steps=500,
         seed=None,
+        processing_time_variation=0,
     ):
 
         self.arrival_rate = arrival_rate
         self.queue_capacity = queue_capacity
 
         self.num_checkpoints = num_checkpoints
+
+        if not isinstance(processing_time, int) or processing_time < 1:
+            raise ValueError(
+                "processing_time must be a positive integer."
+            )
+
+        if (
+            not isinstance(processing_time_variation, int)
+            or processing_time_variation < 0
+            or processing_time_variation >= processing_time
+        ):
+            raise ValueError(
+                "processing_time_variation must be a non-negative integer "
+                "smaller than processing_time."
+            )
+
         self.processing_time = processing_time
+        self.processing_time_variation = processing_time_variation
+        
         self.simulation_steps = simulation_steps
         self.rng = np.random.default_rng(seed)
         self._has_run = False
@@ -102,39 +121,34 @@ class AirportSecurityModel:
             # Start immediately so the next allocation sees updated availability.
             self.start_service(selected, current_time)
 
+    def sample_processing_time(self):
+        #Sample a positive integer service duration for one passenger."""
+            if self.processing_time_variation == 0:
+                return self.processing_time
 
-    def start_service(
-        self,
-        checkpoint_id,
-        current_time
-    ):
+            lower = self.processing_time - self.processing_time_variation
+            upper = self.processing_time + self.processing_time_variation
 
+            return int(self.rng.integers(lower, upper + 1))
+
+    def start_service(self, checkpoint_id, current_time):
         if (
             self.in_service[checkpoint_id] is None
             and len(self.queues[checkpoint_id]) > 0
         ):
+            passenger = self.queues[checkpoint_id].pop(0)
 
-            passenger = self.queues[
-                checkpoint_id
-            ].pop(0)
-
-            passenger.service_start_time = (
-                current_time
-            )
-
+            passenger.service_start_time = current_time
             passenger.waiting_time = (
-                current_time
-                - passenger.arrival_time
+                current_time - passenger.arrival_time
             )
 
-            self.in_service[
-                checkpoint_id
-            ] = passenger
+            passenger.processing_time = self.sample_processing_time()
 
-            self.remaining_service_time[
-                checkpoint_id
-            ] = self.processing_time
-
+            self.in_service[checkpoint_id] = passenger
+            self.remaining_service_time[checkpoint_id] = (
+                passenger.processing_time
+            )
 
     def process_checkpoints(
         self,
