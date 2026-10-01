@@ -1,3 +1,5 @@
+from random import seed
+
 import numpy as np
 from .passenger import Passenger
 
@@ -10,7 +12,8 @@ class AirportSecurityModel:
         queue_capacity=10,
         num_checkpoints=2,
         processing_time=3,
-        simulation_steps=500
+        simulation_steps=500,
+        seed=None,
     ):
 
         self.arrival_rate = arrival_rate
@@ -19,7 +22,9 @@ class AirportSecurityModel:
         self.num_checkpoints = num_checkpoints
         self.processing_time = processing_time
         self.simulation_steps = simulation_steps
-
+        self.rng = np.random.default_rng(seed)
+        self._has_run = False
+        
         self.queues = [
             [] for _ in range(num_checkpoints)
         ]
@@ -43,7 +48,7 @@ class AirportSecurityModel:
         self.external_waiting_history = []
     def create_passenger(self, current_time):
 
-        if np.random.random() < self.arrival_rate:
+        if self.rng.random() < self.arrival_rate:
 
             passenger = Passenger(
                 self.next_passenger_id,
@@ -184,21 +189,19 @@ class AirportSecurityModel:
 
 
     def run(self):
+        if self._has_run:
+            raise RuntimeError(
+                "This model has already been run. Create a new model instance "
+                "to run another simulation."
+            )
+
+        self._has_run = True
 
         for t in range(self.simulation_steps):
-
-            # Finish one step of existing service and serve internal queues first.
             self.process_checkpoints(t)
-
-            # Outside waiters take newly available places before new arrivals.
             self.move_external_passengers(t)
-
-            # New services start at t and are first advanced at t + 1.
             self.create_passenger(t)
-
-            # Record system statistics
             self.record_statistics()
-
 
     def get_results(self):
 
