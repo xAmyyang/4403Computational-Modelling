@@ -40,14 +40,14 @@ The current model does not reject passengers or implement a separate additional-
 | `arrival_rate` | Probability of one arrival per step, between 0 and 1; also expected arrivals per step | 0.4 |
 | `queue_capacity` | Maximum waiting passengers per internal queue, excluding the passenger in service | 10 |
 | `num_checkpoints` | Number of parallel checkpoints and internal queues | 2 |
-| `processing_time` | Central service duration, a positive integer | 3 |
+| `processing_time` | Central service duration, a positive integer | 4 |
 | `processing_time_variation` | Integer half-range of service durations, from 0 to `processing_time - 1` | 0 |
 | `simulation_steps` | Number of observation steps | 500 |
 | `seed` | Random seed; `None` leaves runs non-reproducible | `None` |
 
 With central duration `m` and variation `v`, service duration is sampled uniformly from the integers `m-v` through `m+v`, inclusive. When `v=0`, duration is fixed. Use positive integers for queue capacity, checkpoint count, and simulation length; not all invalid parameter values are currently checked by the model.
 
-The two repeated-run experiments override the defaults: 5,000 steps, seeds 0–29, arrival probability 0.4, queue capacity 10 per checkpoint, and central service duration 4. The variation experiment uses `v=0,1,3` with two checkpoints. The checkpoint experiment uses 1–4 checkpoints and fixed duration 4.
+The two repeated-run experiments use the shared four-step service-time baseline with these settings: 5,000 steps, seeds 0–29, arrival probability 0.4, queue capacity 10 per checkpoint, and central service duration 4. The variation experiment uses `v=0,1,3` with two checkpoints. The checkpoint experiment uses 1–4 checkpoints and fixed duration 4.
 
 ## Setup and Running
 
