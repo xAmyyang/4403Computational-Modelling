@@ -1,1 +1,8 @@
-# Python dependencies
+# Model and numerical analysis
+numpy==2.5.1
+
+# Notebook figures
+matplotlib==3.11.1
+
+# Python kernel for notebooks in VS Code or another Jupyter frontend
+ipykernel==7.3.0

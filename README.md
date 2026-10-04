@@ -1,251 +1,141 @@
 # Airport Security Queue Model
 
-## Project Overview
-
-This project investigates passenger congestion and waiting behaviour in an airport security screening system.
-
-Passengers arrive at the security area, join a queue, wait for an available checkpoint, undergo security screening, and then leave the system.
-
-The aim of this project is to investigate how different system parameters affect queue length, passenger waiting time, throughput, and overall system stability.
-
----
+A discrete-time, agent-based simulation of passengers arriving at airport security, waiting in queues, and being screened by parallel checkpoints. The project investigates how demand, waiting-space limits, and service capacity affect congestion and passenger waiting time.
 
 ## Research Question
 
-**How do passenger demand, queue capacity, processing time, and the number of security checkpoints affect passenger waiting time and congestion in an airport security screening system?**
+**How do passenger arrival probability, queue capacity, service-time variation, and the number of security checkpoints affect waiting time, queue lengths, and throughput?**
 
-More specifically, we investigate four main parameters:
+Time is measured in abstract simulation steps, not seconds or minutes. The model is a simplified computational experiment, not a calibrated forecast for a specific airport.
 
-1. Passenger arrival rate
-2. Queue capacity
-3. Passenger processing time variation
-4. Number of security checkpoints
+## Current Experiments
 
----
+| Notebook | Purpose | Current coverage |
+| --- | --- | --- |
+| [airport_security_model.ipynb](notebooks/airport_security_model.ipynb) | Model demonstration and validation | Baseline, low/high arrival examples, reproducibility and service-duration checks |
+| [processing_time_analysis.ipynb](notebooks/processing_time_analysis.ipynb) | Processing-time variation | Fixed, low, and high variation; 30 seeds per scenario; summaries and comparison figures |
+| [checkpoint_analysis.ipynb](notebooks/checkpoint_analysis.ipynb) | Number of checkpoints | 1–4 checkpoints; 30 seeds per scenario; summaries and comparison figures |
 
-## Modelling Approach
+Systematic arrival-probability and queue-capacity sweeps, and combined-parameter experiments, remain planned work in this checkout. The arrival examples are demonstrations, not a completed repeated-run parameter study.
 
-The system will be implemented as a discrete-time agent-based simulation.
+## How the Model Works
 
-Each passenger is represented as an individual agent.
+Each passenger has an arrival time, queue-entry time, service-start time, assigned service duration, completion time, and waiting time. Each checkpoint serves one passenger at a time and has its own FIFO internal queue. An unbounded external FIFO waiting area holds passengers when all internal queues are full.
 
-A passenger may have attributes such as:
+At each time step, the model:
 
-- arrival time
-- queue entry time
-- service start time
-- processing time
-- waiting time
-- completion time
+1. Advances existing service and records completed passengers. Freed checkpoints start serving their internal queues first.
+2. Admits existing external waiters to available internal queues.
+3. Generates at most one new passenger with the configured arrival probability. The new passenger enters the same admission process, behind existing external waiters.
+4. Records internal queue length and external waiting-area occupancy.
 
-Security checkpoints act as service resources that process passengers.
+Allocation prefers an idle checkpoint, then the shortest available internal queue; checkpoint index breaks ties. Service begins immediately when possible. A service started at time `t` is first advanced at `t + 1`. Passengers already assigned to an internal queue do not switch queues.
 
-At every simulation time step:
+The current model does not reject passengers or implement a separate additional-screening event. Service-duration variation represents different screening durations directly. External admission is FIFO, but service order across separate checkpoint queues is not globally FIFO.
 
-1. New passengers may arrive according to a defined arrival probability or arrival rate.
-2. Newly arrived passengers join the security queue.
-3. If a security checkpoint is available, the next passenger in the queue begins screening.
-4. Each checkpoint can process one passenger at a time.
-5. Screening requires a defined amount of service time.
-6. If the current queue if full, the passenger checks the other queues first.
-7. If all queues are full, the passenger enter an external waiting area.
-8. Some passengers may require additional screening, creating a random delay.
-9. After screening is completed, the passenger leaves the system.
-10. Queue length, waiting time, and throughput are recorded.
+## Parameters
 
-The passenger arrival rate represents how frequently new passengers enter the security system.
+| Parameter | Meaning | Model default |
+| --- | --- | ---: |
+| `arrival_rate` | Probability of one arrival per step, between 0 and 1; also expected arrivals per step | 0.4 |
+| `queue_capacity` | Maximum waiting passengers per internal queue, excluding the passenger in service | 10 |
+| `num_checkpoints` | Number of parallel checkpoints and internal queues | 2 |
+| `processing_time` | Central service duration, a positive integer | 4 |
+| `processing_time_variation` | Integer half-range of service durations, from 0 to `processing_time - 1` | 0 |
+| `simulation_steps` | Number of observation steps | 500 |
+| `seed` | Random seed; `None` leaves runs non-reproducible | `None` |
 
-Different arrival rates will be tested to investigate how increasing passenger demand affects:
+With central duration `m` and variation `v`, service duration is sampled uniformly from the integers `m-v` through `m+v`, inclusive. When `v=0`, duration is fixed. Use positive integers for queue capacity, checkpoint count, and simulation length; not all invalid parameter values are currently checked by the model.
 
-- queue length
-- waiting time
-- throughput
-- system congestion
+The two repeated-run experiments use the shared four-step service-time baseline with these settings: 5,000 steps, seeds 0–29, arrival probability 0.4, queue capacity 10 per checkpoint, and central service duration 4. The variation experiment uses `v=0,1,3` with two checkpoints. The checkpoint experiment uses 1–4 checkpoints and fixed duration 4.
 
-Example values may include:
+## Setup and Running
 
-- low arrival rate
-- medium arrival rate
-- high arrival rate
+The current experiments and figures were checked with Python 3.13. The direct dependencies are pinned in `requirements.txt`; this is not a complete transitive dependency lockfile.
 
-or numerical probabilities such as:
+From the project root, create and activate an environment:
 
-- 0.2 passengers per time step
-- 0.4 passengers per time step
-- 0.6 passengers per time step
-- 0.8 passengers per time step
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
 
----
+On Windows, create the environment with `python -m venv .venv`, then activate it in PowerShell with `.venv\Scripts\Activate.ps1` before installing the requirements.
 
-### 2. Queue Capacity
+Open the project folder in VS Code with its Python and Jupyter extensions installed. Open a notebook, select the `.venv` Python environment as its kernel, then choose **Restart Kernel** and **Run All**. `ipykernel` supplies the Python kernel; a standalone JupyterLab server is not included in these requirements.
 
-Queue capacity represents the maximum number of passengers that can wait in the security queue.
+Recommended reading order:
 
-Different queue capacities will be tested to investigate how limited waiting space affects the system.
+1. `airport_security_model.ipynb` for the baseline and validation checks.
+2. `processing_time_analysis.ipynb` for service-duration variation.
+3. `checkpoint_analysis.ipynb` for checkpoint capacity.
 
-If the queue reaches maximum capacity, newly arriving passengers may be unable to enter the queue.
+The notebooks import the shared model from `src/` and can be run independently. Saved outputs include comparison figures; rerun all cells to regenerate them. Restart the kernel after editing the model. Use a new model instance for each simulation: calling `run()` twice on the same instance raises an error.
 
-Possible measurements include:
+### Minimal Model Example
 
-- number of passengers rejected
-- maximum queue length
-- average waiting time
-- system throughput
+Run this example from the project root:
 
----
+```python
+from src.model import AirportSecurityModel
 
-### 3. Passenger Processing Time Variation
+model = AirportSecurityModel(
+    arrival_rate=0.4,
+    queue_capacity=10,
+    num_checkpoints=2,
+    processing_time=4,
+    processing_time_variation=1,
+    simulation_steps=5000,
+    seed=42,
+)
+model.run()
+results = model.get_results()
+print(results)
+```
 
-Passenger processing time represents how long each passenger requires at a security checkpoint.
+## Measures and Interpretation
 
-Instead of assuming that every passenger takes exactly the same amount of time, processing time may vary between passengers.
+| Measure | Definition |
+| --- | --- |
+| Completed-passenger mean waiting time | Arrival-to-service-start duration, averaged over passengers who complete screening within the observation period |
+| Mean internal queue length | Time average of the total waiting across internal queues; excludes service and external waiting |
+| Mean external queue length | Time average of external waiting-area occupancy |
+| Throughput rate | Completed passengers divided by simulation steps |
+| Unfinished passengers | Passengers still waiting internally, waiting externally, or in service when the simulation ends |
 
-For example:
+`model.get_results()["throughput"]` is a **completed count**, not a rate. Its `external_waiting` field is a **final external count**, not cumulative admissions or rejections. The analysis notebooks compute time averages, throughput rates, and unfinished counts explicitly. They treat waiting-time means with no completed passengers as undefined; the model's basic `get_results()` method currently returns zero in that case.
 
-- Fixed processing time:
-  - every passenger requires 3 time steps
+Scenario summaries give each run equal weight. Waiting-time error bars show one standard deviation **between run means**, not individual-passenger dispersion or confidence intervals. Other comparison panels show means only. Figures and numeric labels are generated from simulation results, not manually entered values.
 
-- Low variation:
-  - processing time randomly varies between 2–4 time steps
+## Assumptions and Limitations
 
-- High variation:
-  - processing time randomly varies between 1–6 time steps
+- **Finite observation period:** simulations start empty, with no warm-up exclusion or drain-down. Results are not established steady-state estimates.
+- **Unfinished passengers:** completed-only waiting statistics omit unfinished journeys and can understate congestion. Read them alongside external queues and unfinished counts, especially in overloaded scenarios.
+- **One-checkpoint overload:** with fixed four-step service, one checkpoint has nominal capacity 0.25 passengers per step versus demand 0.4. Its backlog grows and its reported waiting time depends on the observation horizon.
+- **Capacity changes together:** adding checkpoints also adds internal queues of capacity 10. The checkpoint experiment represents adding checkpoints with associated waiting space, not changing service capacity at fixed total waiting space.
+- **Arrival limit:** at most one passenger arrives per step. With four checkpoints and fixed four-step service, the model permits immediate service for every arrival. Zero waiting under these assumptions is not a general airport prediction.
+- **Randomness:** one generator drives both arrival and service sampling. Matching seeds gives reproducible scenarios, but does not guarantee matched arrivals when service-time variation changes. With fixed service times, matched seeds yield the same arrivals across checkpoint counts.
+- **Scope:** there is no abandonment, rejection, priority screening, queue switching, checkpoint breakdown, or explicit secondary screening.
 
-This experiment will investigate whether greater variation in passenger processing time increases queue length and waiting time.
-
----
-
-### 4. Number of Security Checkpoints
-
-The number of active security checkpoints determines the processing capacity of the airport security system.
-
-Experiments may compare:
-
-- 1 checkpoint
-- 2 checkpoints
-- 3 checkpoints
-- 4 checkpoints
-
-The aim is to investigate how increasing the number of checkpoints affects:
-
-- passenger waiting time
-- queue length
-- throughput
-
-This parameter may also be investigated together with processing time variation.
-
----
-
-## Experimental Design
-
-The project will investigate the four main parameters through controlled experiments.
-
-Where possible, one parameter will be varied while the other parameters are held constant.
-
-### Experiment A — Passenger Arrival Rate
-
-Vary passenger arrival rate while keeping:
-
-- queue capacity constant
-- number of checkpoints constant
-- processing time constant
-
-Measure:
-
-- average waiting time
-- average queue length
-- maximum queue length
-- throughput
-
----
-
-### Experiment B — Queue Capacity
-
-Vary maximum queue capacity while keeping other parameters constant.
-
-Measure:
-
-- number of passengers rejected
-- average waiting time
-- throughput
-- queue utilisation
-
----
-
-### Experiment C — Passenger Processing Time Variation
-
-Compare different levels of passenger processing time variation while keeping:
-
-- arrival rate constant
-- queue capacity constant
-- number of checkpoints constant
-
-Measure:
-
-- average waiting time
-- maximum waiting time
-- average queue length
-- throughput
-
----
-
-### Experiment D — Number of Security Checkpoints
-
-Vary the number of checkpoints while keeping other parameters constant.
-
-Measure:
-
-- average waiting time
-- average queue length
-- throughput
-
----
-
-## Combined Parameter Analysis
-
-After analysing individual parameters, selected parameter combinations may also be investigated.
-
-For example:
-
-### Processing Time Variation × Number of Checkpoints
-
-This experiment will investigate whether increasing the number of checkpoints can compensate for unpredictable passenger processing times.
-
-### Arrival Rate × Queue Capacity
-
-This experiment will investigate how queue capacity affects system performance under different passenger demand levels.
-
----
-
-## Output Measures
-
-The main quantitative measurements will include:
-
-- Average passenger waiting time
-- Maximum passenger waiting time
-- Average queue length
-- Maximum queue length
-- Passenger throughput
-- Number of passengers successfully processed
-- Number of passengers unable to join the queue
-
-Simulation results will be visualised using graphs and summary statistics.
-
----
+Planned extensions include repeated arrival and capacity sweeps, service-variation × checkpoint-count comparisons, and sensitivity checks for simulation length and observation policy.
 
 ## Project Structure
 
 ```text
 project-root/
-|
-+-- src/                  # Main simulation code, models, classes, functions
-|
-+-- utils/                # Helper and utility functions
-|
-+-- data/                 # Generated datasets or sample simulation results
-|
-+-- notebooks/            # Jupyter Notebooks for experiments, analysis and demonstrations
-|
-+-- requirements.txt      # Python dependencies
-|
-+-- README.md             # Project overview, setup instructions and usage guide
+├── src/
+│   ├── __init__.py
+│   ├── passenger.py                     # Passenger attributes
+│   └── model.py                         # Shared simulation rules and basic metrics
+├── utils/                               # Reserved for reusable helper functions
+├── data/                                # Reserved for datasets or exported results
+├── notebooks/
+│   ├── airport_security_model.ipynb     # Demonstration and validation
+│   ├── processing_time_analysis.ipynb   # Service-duration variation
+│   └── checkpoint_analysis.ipynb        # Checkpoint-count comparison
+├── requirements.txt
+└── README.md
+```
+
+Figures and summaries are currently embedded in the notebooks. No external dataset is required. Contributors should update the shared model in `src/` and import it into experiments rather than maintaining separate model copies.
