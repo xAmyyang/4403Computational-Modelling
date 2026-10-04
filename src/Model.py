@@ -12,7 +12,7 @@ class AirportSecurityModel:
         queue_capacity=10,
         num_checkpoints=2,
         processing_time=4,
-        simulation_steps=500,
+        simulation_steps=5000,
         seed=None,
         processing_time_variation=0,
     ):
