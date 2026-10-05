@@ -15,6 +15,8 @@ Time is measured in abstract simulation steps, not seconds or minutes. The model
 | [airport_security_model.ipynb](notebooks/airport_security_model.ipynb) | Model demonstration and validation | Baseline, low/high arrival examples, reproducibility and service-duration checks |
 | [processing_time_analysis.ipynb](notebooks/processing_time_analysis.ipynb) | Processing-time variation | Fixed, low, and high variation; 30 seeds per scenario; summaries and comparison figures |
 | [checkpoint_analysis.ipynb](notebooks/checkpoint_analysis.ipynb) | Number of checkpoints | 1–4 checkpoints; 30 seeds per scenario; summaries and comparison figures |
+| [passenger_arrival_rate_analysis.ipynb](notebooks/passenger_arrival_rate_analysis.ipynb) | Passenger arrival rate | 0.2, 0.3 0.4 and 0.5 arrival probabilities; 30 seeds per scenario; summaries and comparison figures |
+| [queue_capacity_analysis.ipynb](notebooks/queue_capacity_analysis.ipynb) | Queue capacity | Multiple queue capacities; 30 seeds per scenario; summaries and comparison figures |
 
 Systematic arrival-probability and queue-capacity sweeps, and combined-parameter experiments, remain planned work in this checkout. The arrival examples are demonstrations, not a completed repeated-run parameter study.
 
@@ -42,7 +44,7 @@ The current model does not reject passengers or implement a separate additional-
 | `num_checkpoints` | Number of parallel checkpoints and internal queues | 2 |
 | `processing_time` | Central service duration, a positive integer | 4 |
 | `processing_time_variation` | Integer half-range of service durations, from 0 to `processing_time - 1` | 0 |
-| `simulation_steps` | Number of observation steps | 500 |
+| `simulation_steps` | Number of observation steps | 5000 |
 | `seed` | Random seed; `None` leaves runs non-reproducible | `None` |
 
 With central duration `m` and variation `v`, service duration is sampled uniformly from the integers `m-v` through `m+v`, inclusive. When `v=0`, duration is fixed. Use positive integers for queue capacity, checkpoint count, and simulation length; not all invalid parameter values are currently checked by the model.
@@ -70,6 +72,8 @@ Recommended reading order:
 1. `airport_security_model.ipynb` for the baseline and validation checks.
 2. `processing_time_analysis.ipynb` for service-duration variation.
 3. `checkpoint_analysis.ipynb` for checkpoint capacity.
+4. `passenger_arrival_rate_analysis.ipynb` for passenger arrival rate.
+5. `queue_capacity_analysis.ipnby` for queue capacity.
 
 The notebooks import the shared model from `src/` and can be run independently. Saved outputs include comparison figures; rerun all cells to regenerate them. Restart the kernel after editing the model. Use a new model instance for each simulation: calling `run()` twice on the same instance raises an error.
 
@@ -126,14 +130,16 @@ Planned extensions include repeated arrival and capacity sweeps, service-variati
 project-root/
 ├── src/
 │   ├── __init__.py
-│   ├── passenger.py                     # Passenger attributes
-│   └── model.py                         # Shared simulation rules and basic metrics
-├── utils/                               # Reserved for reusable helper functions
-├── data/                                # Reserved for datasets or exported results
+│   ├── passenger.py                          # Passenger attributes
+│   └── model.py                              # Shared simulation rules and basic metrics
+├── utils/                                    # Reserved for reusable helper functions
+├── data/                                     # Reserved for datasets or exported results
 ├── notebooks/
-│   ├── airport_security_model.ipynb     # Demonstration and validation
-│   ├── processing_time_analysis.ipynb   # Service-duration variation
-│   └── checkpoint_analysis.ipynb        # Checkpoint-count comparison
+│   ├── airport_security_model.ipynb          # Demonstration and validation
+│   ├── processing_time_analysis.ipynb        # Service-duration variation
+│   ├── checkpoint_analysis.ipynb             # Checkpoint-count comparison
+│   ├── passenger_arrival_rate_analysis.ipynb # Passenger arrival rate analysis
+│   └── queue_capacity_analysis.ipynb         # Queue capacity analysis
 ├── requirements.txt
 └── README.md
 ```
