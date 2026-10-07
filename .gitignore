@@ -1,0 +1,16 @@
+# Local operating-system files
+.DS_Store
+
+# Generated Python bytecode
+__pycache__/
+*.py[cod]
+
+# Local environments and notebook checkpoints
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Test and coverage caches
+.pytest_cache/
+.coverage
+htmlcov/

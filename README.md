@@ -48,7 +48,7 @@ The current model does not reject passengers or implement a separate additional-
 | `simulation_steps` | Number of observation steps | 5000 |
 | `seed` | Random seed; `None` leaves runs non-reproducible | `None` |
 
-With central duration `m` and variation `v`, service duration is sampled uniformly from the integers `m-v` through `m+v`, inclusive. When `v=0`, duration is fixed. Use positive integers for queue capacity, checkpoint count, and simulation length; not all invalid parameter values are currently checked by the model.
+With central duration `m` and variation `v`, service duration is sampled uniformly from the integers `m-v` through `m+v`, inclusive. When `v=0`, duration is fixed. Queue capacity, checkpoint count, service duration, and simulation length must be positive integers. Arrival probability must be a finite number in [0, 1]. Boolean values are rejected as numeric settings. Invalid settings raise a descriptive `ValueError` during initialisation. Zero internal queue capacity is not supported by this model.
 
 All four repeated-run experiments use 5,000 steps and seeds 0–29. The shared baseline is arrival probability 0.4, queue capacity 10 per checkpoint, two checkpoints, and fixed service duration 4. Each study varies one factor while retaining the other baseline settings:
 
@@ -90,6 +90,16 @@ Recommended reading order:
 
 The notebooks import the shared model from `src/` and can be run independently. Saved outputs include comparison figures; rerun all cells to regenerate them. Restart the kernel after editing the model. Use a new model instance for each simulation: calling `run()` twice on the same instance raises an error.
 
+### Model Checks
+
+From the project root, run the standard-library test suite:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Checks cover invalid parameters, no arrivals, no completed passengers, known service timing, per-step passenger conservation and capacity bounds, FIFO admission, repeat-run protection, reproducibility, and explicit parameter overrides. Existing notebook validation checks remain part of the demonstration and combined experiment.
+
 ### Minimal Model Example
 
 Run this example from the project root:
@@ -121,7 +131,7 @@ print(results)
 | Throughput rate | Completed passengers divided by simulation steps |
 | Unfinished passengers | Passengers still waiting internally, waiting externally, or in service when the simulation ends |
 
-`model.get_results()["throughput"]` is a **completed count**, not a rate. Its `external_waiting` field is a **final external count**, not cumulative admissions or rejections. The analysis notebooks compute time averages, throughput rates, and unfinished counts explicitly. The checkpoint, service-variation, and combined arrival-variation notebooks treat waiting-time means with no completed passengers as undefined. The arrival and queue-capacity notebooks currently use the basic `get_results()` method, which returns zero in that case; those two notebooks therefore need an explicit undefined-value check before using scenarios with no completions. All runs in the current five parameter studies have completed passengers.
+`model.get_results()["throughput"]` is a **completed count**, not a rate. Its `external_waiting` field is a **final external count**, not cumulative admissions or rejections. The analysis notebooks compute time averages, throughput rates, and unfinished counts explicitly. The model and all analysis notebooks treat waiting-time statistics with no completed passengers as undefined (`NaN`), not zero. Summary calculations exclude undefined run means and report their valid count. Standard deviations require at least two valid runs. Before any time steps are recorded, the model also reports queue statistics as `NaN`. All runs in the current five parameter studies have completed passengers.
 
 Scenario summaries give each run equal weight. Waiting-time error bars show one standard deviation **between run means**, not individual-passenger dispersion or confidence intervals. Other comparison panels show means or descriptive differences between scenario means only; the combined-study waiting-gap plot does not include uncertainty bars. Figures and numeric labels are generated from simulation results, not manually entered values.
 
@@ -170,6 +180,9 @@ project-root/
 │   ├── passenger_arrival_rate_analysis.ipynb # Passenger arrival rate analysis
 │   ├── queue_capacity_analysis.ipynb         # Queue capacity analysis
 │   └── arrival_variation_analysis.ipynb       # Combined demand and service-variation study
+├── tests/
+│   └── test_model.py                         # Model boundary and behaviour checks
+├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
